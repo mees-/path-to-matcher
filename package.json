@@ -1,0 +1,19 @@
+{
+  "name": "path-to-matcher",
+  "version": "1.0.0",
+  "description": "A convenient way to match paths and extract variables express-style",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "repository": {
+    "url": "mees-/path-to-matcher",
+    "type": "git"
+  },
+  "author": "Mees van Dijk",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.1.2"
+  }
+}
