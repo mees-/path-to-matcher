@@ -5,7 +5,6 @@ const { expect } = require('chai')
 describe('matcher', () => {
   it('should return a match funtion', () => {
     const match = compileMatcher('test is :working')
-    console.log(match)
     expect(match).to.be.a('function')
   })
 
