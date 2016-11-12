@@ -1,10 +1,10 @@
-const compileMatcher = require('./index')
+const compileMatch = require('./index')
 const { describe, it } = require('mocha')
 const { expect } = require('chai')
 
-describe('matcher', () => {
+describe('compileMatch', () => {
   it('should return a match funtion', () => {
-    const match = compileMatcher('test is :working')
+    const match = compileMatch('test is :working')
     expect(match).to.be.a('function')
   })
 
@@ -12,7 +12,7 @@ describe('matcher', () => {
     describe('end: true, no variables', () => {
       it('should match when given correct inputs', () => {
         const path = 'test is testing'
-        const match = compileMatcher(path, { end: true })
+        const match = compileMatch(path, { end: true })
 
         const result = match(path)
         expect(result.match).to.equal(true)
@@ -21,7 +21,7 @@ describe('matcher', () => {
       it('should not match when given wrong inputs', () => {
         const path = 'test is testing'
         const route = 'testing test is'
-        const match = compileMatcher(path, { end: true })
+        const match = compileMatch(path, { end: true })
 
         const result = match(route)
         expect(result.match).to.equal(false)
@@ -32,7 +32,7 @@ describe('matcher', () => {
       it('should match when given correct inputs', () => {
         const path = 'test is testing'
         const longerPath = `${ path } this should match`
-        const match = compileMatcher(path, { end: false })
+        const match = compileMatch(path, { end: false })
 
         const result = match(longerPath)
         expect(result.match).to.equal(true)
@@ -41,7 +41,7 @@ describe('matcher', () => {
       it('should not match when given wrong inputs', () => {
         const path = 'test is testing'
         const route = 'testing test is this should not match'
-        const match = compileMatcher(path, { end: false })
+        const match = compileMatch(path, { end: false })
 
         const result = match(route)
         expect(result.match).to.equal(false)
@@ -52,7 +52,7 @@ describe('matcher', () => {
       it('should match when given correct inputs', () => {
         const path = 'test is :testing'
         const route = 'test is working'
-        const match = compileMatcher(path, { end: true })
+        const match = compileMatch(path, { end: true })
 
         const result = match(route)
         expect(result.match).to.equal(true)
@@ -61,7 +61,7 @@ describe('matcher', () => {
       it('should not match when given wrong inputs', () => {
         const path = 'test is :testing'
         const route = 'is test working'
-        const match = compileMatcher(path, { end: true })
+        const match = compileMatch(path, { end: true })
 
         const result = match(route)
         expect(result.match).to.equal(false)
@@ -72,7 +72,7 @@ describe('matcher', () => {
       it('should match when given correct inputs', () => {
         const path = 'test is :testing'
         const route = 'test is working and this should match'
-        const match = compileMatcher(path, { end: false })
+        const match = compileMatch(path, { end: false })
 
         const result = match(route)
         expect(result.match).to.equal(true)
@@ -81,7 +81,7 @@ describe('matcher', () => {
       it('should not match when given wrong inputs', () => {
         const path = 'test is :testing'
         const route = 'is test working and this should not match'
-        const match = compileMatcher(path, { end: false })
+        const match = compileMatch(path, { end: false })
 
         const result = match(route)
         expect(result.match).to.equal(false)
@@ -92,7 +92,7 @@ describe('matcher', () => {
       it('should work with one variable', () => {
         const path = 'is the test working :answer'
         const route = 'is the test working yes'
-        const match = compileMatcher(path)
+        const match = compileMatch(path)
 
         const result = match(route)
         expect(result.vars).to.eql({ answer: 'yes' })
@@ -101,36 +101,87 @@ describe('matcher', () => {
       it('should work with multiple variables', () => {
         const path = ':name :age :coolness'
         const route = 'matcher 1minute over9000'
-        const match = compileMatcher(path)
+        const match = compileMatch(path)
 
         const result = match(route)
         expect(result.vars).to.eql({ name: 'matcher', age: '1minute', coolness: 'over9000' })
       })
+      describe('optionalVariables', () => {
+        it('should work with filled in optionalVariables', () => {
+          const path = 'testing opt ?variables'
+          const route = 'testing opt working'
+          const match = compileMatch(path)
+
+          const result = match(route)
+          expect(result.vars).to.eql({ variables: 'working' })
+        })
+
+        it('should work with left out optionalVariables', () => {
+          const path = 'testing opt ?variables ?test'
+          const route = 'testing opt testistrue'
+          const match = compileMatch(path)
+
+          const result = match(route)
+          expect(result.vars).to.eql({ variables: 'testistrue', test: null })
+        })
+
+        it('should throw when optionalVariables appear before normal variables', () => {
+          const path = 'testing opt ?variables :test'
+          const route = 'testing opt testistrue'
+          const toTest = compileMatch.bind(null, path)
+
+          expect(toTest).to.throw(Error)
+        })
+      })
     })
 
     describe('options', () => {
-      describe('delimiter', () => {
-        it('should work with a different delimiter', () => {
-          const path = 'test/is/testing'
-          const route = 'test/is/testing/and/works'
-          const match = compileMatcher(path, { delimiter: '/', end: false })
+      it('should work with a different delimiter', () => {
+        const path = 'test/is/testing'
+        const route = 'test/is/testing/and/works'
+        const match = compileMatch(path, { delimiter: '/', end: false })
 
-          const result = match(route)
-          expect(result.match).to.equal(true)
-        })
+        const result = match(route)
+        expect(result.match).to.equal(true)
       })
 
-      describe('variableIndicator', () => {
-        it('should work with a different variableIndicator', () => {
-          const path = 'test is §§working §working'
-          const route = 'test is indeed §working'
-          const match = compileMatcher(path, { variableIndicator: '§§' })
+      it('should work with a different variableIndicator', () => {
+        const path = 'test is §§working §working'
+        const route = 'test is indeed §working'
+        const match = compileMatch(path, { variableIndicator: '§§' })
 
-          const result = match(route)
-          expect(result.match).to.equal(true)
-          expect(result.vars).to.eql({ working: 'indeed' })
-        })
+        const result = match(route)
+        expect(result.match).to.equal(true)
+        expect(result.vars).to.eql({ working: 'indeed' })
+      })
+
+      it('should work with a different optionalIndicator', () => {
+        const path = 'testing is >working'
+        const route = 'testing is'
+        const match = compileMatch(path, { optionalIndicator: '>' })
+
+        const result = match(route)
+        expect(result.vars).to.eql({ working: null })
       })
     })
+  })
+})
+
+describe('equal', () => {
+  const stubOptions = {
+    variableIndicator: ':',
+    optionalIndicator: '?'
+  }
+
+  it('should work without variables', () => {
+    expect(compileMatch.equal(stubOptions, ['test', 'is', 'testing'], ['test', 'is', 'testing'])).to.equal(true)
+  })
+
+  it('should work with variables', () => {
+    expect(compileMatch.equal(stubOptions, ['test', 'is', ':testing'], ['test', 'is', 'working'])).to.equal(true)
+  })
+
+  it('should work with optionalVariables', () => {
+    expect(compileMatch.equal(stubOptions, ['test', 'is', '?testing'], ['test', 'is'])).to.equal(true)
   })
 })
