@@ -127,7 +127,13 @@ describe('compileMatch', () => {
 
         it('should throw when optionalVariables appear before normal variables', () => {
           const path = 'testing opt ?variables :test'
-          const route = 'testing opt testistrue'
+          const toTest = compileMatch.bind(null, path)
+
+          expect(toTest).to.throw(Error)
+        })
+
+        it('should throw an when optionalVariables appear before normal path parts', () => {
+          const path = 'testing opt ?variables test'
           const toTest = compileMatch.bind(null, path)
 
           expect(toTest).to.throw(Error)
@@ -174,14 +180,34 @@ describe('equal', () => {
   }
 
   it('should work without variables', () => {
-    expect(compileMatch.equal(stubOptions, ['test', 'is', 'testing'], ['test', 'is', 'testing'])).to.equal(true)
+    const pathParts = ['test', 'is', 'testing']
+    const routeParts = ['test', 'is', 'testing']
+
+    const result = compileMatch.equal(stubOptions, pathParts, routeParts)
+    expect(result).to.equal(true)
   })
 
   it('should work with variables', () => {
-    expect(compileMatch.equal(stubOptions, ['test', 'is', ':testing'], ['test', 'is', 'working'])).to.equal(true)
+    const pathParts = ['test', 'is', ':testing']
+    const routeParts = ['test', 'is', 'working']
+
+    const result = compileMatch.equal(stubOptions, pathParts, routeParts)
+    expect(result).to.equal(true)
   })
 
-  it('should work with optionalVariables', () => {
-    expect(compileMatch.equal(stubOptions, ['test', 'is', '?testing'], ['test', 'is'])).to.equal(true)
+  it('should work with optionalVariables not filled in', () => {
+    const pathParts = ['test', 'is', '?testing']
+    const routeParts = ['test', 'is']
+
+    const result = compileMatch.equal(stubOptions, pathParts, routeParts)
+    expect(result).to.equal(true)
+  })
+
+  it('should work with optionalVariables filled in', () => {
+    const pathParts = ['test', 'is', '?testing']
+    const routeParts = ['test', 'is', 'working']
+
+    const result = compileMatch.equal(stubOptions, pathParts, routeParts)
+    expect(result).to.equal(true)
   })
 })
