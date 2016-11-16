@@ -71,9 +71,9 @@ module.exports = function compileMatch(tPath, tOptions = {}) {
     }
 
     // create array of parts in string
-    let strParts = str.split(options.delimiter)
-    if (!options.end) {
-      strParts = strParts.slice(0, pathParts.length)
+    const strParts = str.split(options.delimiter)
+    if (options.end && strParts.length > pathParts.length) {
+      return false
     }
 
     // init return values
@@ -92,10 +92,9 @@ module.exports = function compileMatch(tPath, tOptions = {}) {
 
 // define equal function with access to passed options
 module.exports.equal = function equal(options, a, b) {
-  for (let i = 0; i < Math.max(a.length, b.length); i++) {
-    const condition1 = !!a[i]
-    const condition2 = a[i].startsWith(options.optionalIndicator) ? true : !!b[i]
-    if (!condition1 || !condition2) return false
+  for (let i = 0; i < a.length; i++) {
+    const condition = a[i].startsWith(options.optionalIndicator) ? true : !!b[i]
+    if (!condition) return false
     if (!a[i].startsWith(options.variableIndicator) && !a[i].startsWith(options.optionalIndicator)) {
       if (a[i] !== b[i]) return false
     }
